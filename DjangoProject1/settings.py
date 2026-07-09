@@ -40,6 +40,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 INSTALLED_APPS = [
     'hello',
+    'task',
 
     'django.contrib.admin',
     'django.contrib.auth',
