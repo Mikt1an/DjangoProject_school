@@ -1,19 +1,36 @@
 from django.db import models
 
+
+class TimeStampModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        abstract = True
+
+
 # Create your models here.
-class Category(models.Model):
+class Category(TimeStampModel):
     name = models.CharField(max_length=200, unique=True)
 
     class Meta:
-        verbose_name = 'Category'
-        verbose_name_plural = 'Categories'
-        ordering = ('name',)
+        db_table = "task_manager_category"
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name"],
+                name="unique_category_name",
+            ),
+        ]
 
     def __str__(self):
         return self.name
 
 
-class Task(models.Model):
+class Task(TimeStampModel):
     class Status(models.TextChoices):
         NEW = "new", "New"
         IN_PROGRESS = "in-progress", "In Progress"
@@ -26,18 +43,26 @@ class Task(models.Model):
     category = models.ManyToManyField(Category, related_name='tasks', blank=True)
     status = models.CharField(choices=Status.choices, max_length=20, default=Status.NEW)
     deadline = models.DateTimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Task'
-        verbose_name_plural = 'Tasks'
-        ordering = ["deadline", "status",]
+        db_table = "task_manager_task"
+        ordering = ["-created_at"]
+        verbose_name = "Task"
+        verbose_name_plural = "Tasks"
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["title"],
+                name="unique_task_title",
+            ),
+        ]
 
     def __str__(self):
         return self.title
 
 
-class SubTask(models.Model):
+class SubTask(TimeStampModel):
     class Status(models.TextChoices):
         NEW = "new", "New"
         IN_PROGRESS = "in_progress", "In progress"
@@ -61,12 +86,20 @@ class SubTask(models.Model):
     )
 
     deadline = models.DateTimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "task_manager_subtask"
+        ordering = ["-created_at"]
         verbose_name = "SubTask"
         verbose_name_plural = "SubTasks"
-        ordering = ["deadline", "status"]
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=["title"],
+                name="unique_subtask_title",
+            ),
+        ]
 
     def __str__(self):
         return self.title
