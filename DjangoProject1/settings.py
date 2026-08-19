@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'hello',
     'task',
     'library',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
