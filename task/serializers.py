@@ -5,7 +5,7 @@ from .models import Task, Category, SubTask
 
 
 class SubTaskSerializer(serializers.ModelSerializer):
-    task = serializers.CharField(source="task.title", read_only=True)
+    task = serializers.SlugRelatedField(read_only=True, slug_field="title",)
     class Meta:
         model = SubTask
         fields = (
