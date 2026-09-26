@@ -30,8 +30,14 @@ class CategoryCreateSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
+            "is_deleted",
+            "deleted_at",
         )
-        read_only_fields = ("id",)
+        read_only_fields = (
+            "id",
+            "is_deleted",
+            "deleted_at",
+        )
 
     def create(self, validated_data):
         name = validated_data["name"]
