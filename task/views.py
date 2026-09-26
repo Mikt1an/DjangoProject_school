@@ -2,24 +2,53 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, status
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Task, SubTask
+from .pagination import SubTaskPagination
 from .serializers import (
-    SubTaskCreateSerializer, SubTaskSerializer,
-    TaskCreateSerializer, TaskDetailSerializer, TaskSerializer,
+    SubTaskCreateSerializer,
+    SubTaskSerializer,
+    TaskCreateSerializer,
+    TaskDetailSerializer,
+    TaskSerializer,
 )
 
-# Create your views here.
+
 class TaskCreateView(generics.CreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskCreateSerializer
 
 
-class TaskListView(generics.ListAPIView):
-    queryset = Task.objects.all().order_by("id")
+class TaskListView(ListAPIView):
     serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        queryset = Task.objects.all()
+
+        weekday = self.request.query_params.get("weekday")
+
+        if weekday:
+            weekdays = {
+                "sunday": 1,
+                "monday": 2,
+                "tuesday": 3,
+                "wednesday": 4,
+                "thursday": 5,
+                "friday": 6,
+                "saturday": 7,
+            }
+
+            weekday_number = weekdays.get(weekday.lower())
+
+            if weekday_number:
+                queryset = queryset.filter(
+                    deadline__week_day=weekday_number,
+                )
+
+        return queryset
 
 
 class TaskDetailView(generics.RetrieveAPIView):
@@ -66,36 +95,37 @@ class TaskStatisticsView(APIView):
         )
 
 
-class SubTaskListCreateView(APIView):
-    def get(self, request):
-        subtasks = SubTask.objects.all().order_by("id")
-        serializer = SubTaskSerializer(
-            subtasks,
-            many=True,
+class SubTaskListCreateView(generics.ListCreateAPIView):
+    queryset = SubTask.objects.all()
+    pagination_class = SubTaskPagination
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return SubTaskCreateSerializer
+
+        return SubTaskSerializer
+
+    def get_queryset(self):
+        queryset = (
+            SubTask.objects
+            .all()
+            .order_by("-created_at")
         )
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK,
-        )
+        task_title = self.request.query_params.get("task_title")
+        subtask_status = self.request.query_params.get("status")
 
-    def post(self, request):
-        serializer = SubTaskCreateSerializer(
-            data=request.data,
-        )
-
-        if serializer.is_valid():
-            serializer.save()
-
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED,
+        if task_title:
+            queryset = queryset.filter(
+                task__title__iexact=task_title,
             )
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        if subtask_status:
+            queryset = queryset.filter(
+                status=subtask_status,
+            )
+
+        return queryset
 
 
 class SubTaskDetailUpdateDeleteView(APIView):
