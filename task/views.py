@@ -8,7 +8,6 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Task, Category, SubTask
-from .pagination import SubTaskPagination
 from .serializers import (
     CategoryCreateSerializer,
     SubTaskCreateSerializer,
@@ -127,7 +126,6 @@ class TaskStatisticsView(APIView):
 
 class SubTaskListCreateView(generics.ListCreateAPIView):
     queryset = SubTask.objects.all()
-    pagination_class = SubTaskPagination
 
     filter_backends = [
         DjangoFilterBackend,
