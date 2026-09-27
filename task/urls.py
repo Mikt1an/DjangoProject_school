@@ -11,6 +11,12 @@ from .views import (
     TaskListCreateView,
     TaskStatisticsView,
 )
+from .auth_views import (
+    LoginView,
+    LogoutView,
+    RefreshView,
+    RegisterView,
+)
 
 
 router = DefaultRouter()
@@ -52,6 +58,29 @@ urlpatterns = [
         "subtasks/<int:pk>/",
         SubTaskDetailUpdateDeleteView.as_view(),
         name="subtask-detail",
+    ),
+    path(
+        "auth/register/",
+        RegisterView.as_view(),
+        name="register",
+    ),
+
+    path(
+        "auth/login/",
+        LoginView.as_view(),
+        name="login",
+    ),
+
+    path(
+        "auth/refresh/",
+        RefreshView.as_view(),
+        name="refresh",
+    ),
+
+    path(
+        "auth/logout/",
+        LogoutView.as_view(),
+        name="logout",
     ),
 ]
 
