@@ -1,11 +1,16 @@
 from django.db.models import Count, Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import filters, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 
 from .models import Task, Category, SubTask
 from .serializers import (
@@ -20,6 +25,7 @@ from .serializers import (
 
 class TaskListCreateView(generics.ListCreateAPIView):
     queryset = Task.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     filter_backends = [
         DjangoFilterBackend,
@@ -77,6 +83,7 @@ class TaskDetailUpdateDeleteView(
     generics.RetrieveUpdateDestroyAPIView
 ):
     queryset = Task.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -86,6 +93,8 @@ class TaskDetailUpdateDeleteView(
 
 
 class TaskStatisticsView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         summary = Task.objects.aggregate(
             total_tasks=Count("id"),
@@ -126,6 +135,7 @@ class TaskStatisticsView(APIView):
 
 class SubTaskListCreateView(generics.ListCreateAPIView):
     queryset = SubTask.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     filter_backends = [
         DjangoFilterBackend,
@@ -174,6 +184,7 @@ class SubTaskDetailUpdateDeleteView(
     generics.RetrieveUpdateDestroyAPIView
 ):
     queryset = SubTask.objects.all()
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -185,6 +196,7 @@ class SubTaskDetailUpdateDeleteView(
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategoryCreateSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     @action(
         detail=True,

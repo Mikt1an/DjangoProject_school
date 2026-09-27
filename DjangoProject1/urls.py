@@ -17,6 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 from task.views import (
     SubTaskDetailUpdateDeleteView,
     SubTaskListCreateView,
@@ -30,5 +35,6 @@ urlpatterns = [
     path("hello/", include("hello.urls")),
     # path("library/", include("library.urls")),
     path("api/", include("task.urls")),
-
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair",),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh",),
 ]
