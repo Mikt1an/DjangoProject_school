@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -55,6 +56,8 @@ class Category(TimeStampModel):
 
 
 class Task(TimeStampModel):
+
+
     class Status(models.TextChoices):
         NEW = "new", "New"
         IN_PROGRESS = "in-progress", "In Progress"
@@ -62,9 +65,19 @@ class Task(TimeStampModel):
         BLOCKED = "blocked", "Blocked"
         DONE = "done", "Done"
 
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="tasks",
+        null=True,
+        blank=True,
+    )
+
     title = models.CharField(max_length=200, unique_for_date='deadline',)
     description = models.TextField(blank=True)
     category = models.ManyToManyField(Category, related_name='tasks', blank=True)
+
     status = models.CharField(choices=Status.choices, max_length=20, default=Status.NEW)
     deadline = models.DateTimeField()
     created_at = models.DateTimeField(auto_now=True)
@@ -87,6 +100,8 @@ class Task(TimeStampModel):
 
 
 class SubTask(TimeStampModel):
+
+
     class Status(models.TextChoices):
         NEW = "new", "New"
         IN_PROGRESS = "in_progress", "In progress"
@@ -94,21 +109,20 @@ class SubTask(TimeStampModel):
         BLOCKED = "blocked", "Blocked"
         DONE = "done", "Done"
 
-    title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
 
-    task = models.ForeignKey(
-        Task,
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="subtasks",
+        null=True,
+        blank=True,
     )
 
-    status = models.CharField(
-        max_length=20,
-        choices=Status.choices,
-        default=Status.NEW,
-    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="subtasks",)
 
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.NEW,)
     deadline = models.DateTimeField()
     created_at = models.DateTimeField(auto_now=True)
 

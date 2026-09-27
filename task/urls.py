@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     CategoryViewSet,
+    CurrentUserTaskListView,
     SubTaskDetailUpdateDeleteView,
     SubTaskListCreateView,
     TaskDetailUpdateDeleteView,
@@ -31,6 +32,11 @@ urlpatterns = [
         "tasks/statistics/",
         TaskStatisticsView.as_view(),
         name="task-statistics",
+    ),
+    path(
+        "tasks/my/",
+        CurrentUserTaskListView.as_view(),
+        name="current-user-tasks",
     ),
     path(
         "tasks/<int:pk>/",

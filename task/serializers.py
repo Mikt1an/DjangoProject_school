@@ -10,6 +10,7 @@ class SubTaskSerializer(serializers.ModelSerializer):
         model = SubTask
         fields = (
             "id",
+            "owner",
             "title",
             "description",
             "task",
@@ -17,7 +18,7 @@ class SubTaskSerializer(serializers.ModelSerializer):
             "deadline",
             "created_at",
         )
-        read_only_fields = ("id",)
+        read_only_fields = ("id", "owner")
 
 
 class SubTaskCreateSerializer(SubTaskSerializer):
@@ -76,12 +77,13 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = (
             "id",
+            "owner",
             "title",
             "description",
             "status",
             "deadline",
         )
-        read_only_fields = ("id",)
+        read_only_fields = ("id", "owner",)
 
 
 class TaskCreateSerializer(TaskSerializer):

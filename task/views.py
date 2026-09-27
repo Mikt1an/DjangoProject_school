@@ -12,6 +12,7 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 
+from .permissions import IsOwnerOrReadOnly
 from .models import Task, Category, SubTask
 from .serializers import (
     CategoryCreateSerializer,
@@ -53,6 +54,9 @@ class TaskListCreateView(generics.ListCreateAPIView):
 
         return TaskSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
     def get_queryset(self):
         queryset = Task.objects.all()
 
@@ -83,7 +87,10 @@ class TaskDetailUpdateDeleteView(
     generics.RetrieveUpdateDestroyAPIView
 ):
     queryset = Task.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly,
+    ]
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -167,6 +174,9 @@ class SubTaskListCreateView(generics.ListCreateAPIView):
 
         return SubTaskSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
     def get_queryset(self):
         queryset = SubTask.objects.all()
 
@@ -184,7 +194,10 @@ class SubTaskDetailUpdateDeleteView(
     generics.RetrieveUpdateDestroyAPIView
 ):
     queryset = SubTask.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsOwnerOrReadOnly,
+    ]
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -211,4 +224,14 @@ class CategoryViewSet(ModelViewSet):
                 "tasks_count": category.tasks.count(),
             },
             status=status.HTTP_200_OK,
+        )
+
+
+class CurrentUserTaskListView(generics.ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(
+            owner=self.request.user,
         )
